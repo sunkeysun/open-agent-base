@@ -1,0 +1,11 @@
+{
+  "id": "{{CHANNEL_ID}}",
+  "name": "{{CHANNEL_LABEL}} Plugin",
+  "description": "{{CHANNEL_LABEL}} messaging channel plugin for OpenClaw",
+  "channels": ["{{CHANNEL_ID}}"],
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}

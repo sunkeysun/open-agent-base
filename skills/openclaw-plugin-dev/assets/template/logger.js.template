@@ -1,0 +1,63 @@
+/**
+ * OpenClaw {{CHANNEL_LABEL}} Plugin Logger
+ *
+ * Simple logging utility with channel prefix.
+ */
+
+const LOG_PREFIX = "[{{CHANNEL_ID}}]";
+
+export const logger = {
+  /**
+   * Log info message
+   * @param {string} message - Log message
+   * @param {Object} data - Optional data to log
+   */
+  info(message, data) {
+    if (data) {
+      console.log(`${LOG_PREFIX} ${message}`, data);
+    } else {
+      console.log(`${LOG_PREFIX} ${message}`);
+    }
+  },
+
+  /**
+   * Log warning message
+   * @param {string} message - Log message
+   * @param {Object} data - Optional data to log
+   */
+  warn(message, data) {
+    if (data) {
+      console.warn(`${LOG_PREFIX} WARN: ${message}`, data);
+    } else {
+      console.warn(`${LOG_PREFIX} WARN: ${message}`);
+    }
+  },
+
+  /**
+   * Log error message
+   * @param {string} message - Log message
+   * @param {Object} data - Optional data to log
+   */
+  error(message, data) {
+    if (data) {
+      console.error(`${LOG_PREFIX} ERROR: ${message}`, data);
+    } else {
+      console.error(`${LOG_PREFIX} ERROR: ${message}`);
+    }
+  },
+
+  /**
+   * Log debug message (only when DEBUG env is set)
+   * @param {string} message - Log message
+   * @param {Object} data - Optional data to log
+   */
+  debug(message, data) {
+    if (process.env.DEBUG) {
+      if (data) {
+        console.debug(`${LOG_PREFIX} DEBUG: ${message}`, data);
+      } else {
+        console.debug(`${LOG_PREFIX} DEBUG: ${message}`);
+      }
+    }
+  },
+};

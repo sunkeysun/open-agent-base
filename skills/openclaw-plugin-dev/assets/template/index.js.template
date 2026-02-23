@@ -1,0 +1,78 @@
+/**
+ * OpenClaw {{CHANNEL_LABEL}} Plugin Entry Point
+ *
+ * This is the main entry point for the plugin.
+ * It registers the channel plugin and HTTP handler with OpenClaw.
+ */
+
+import { create{{CHANNEL_CLASS}}ChannelPlugin } from "./channel.js";
+import { create{{CHANNEL_CLASS}}HttpHandler } from "./webhook.js";
+import { logger } from "./logger.js";
+
+// Default account ID (single-account channels)
+const DEFAULT_ACCOUNT_ID = "default";
+
+// Runtime reference (set during registration)
+let _runtime = null;
+let _openclawConfig = null;
+
+/**
+ * Set the plugin runtime (called during registration)
+ */
+function setRuntime(runtime) {
+  _runtime = runtime;
+}
+
+/**
+ * Get the plugin runtime
+ * @throws {Error} If runtime not initialized
+ */
+export function getRuntime() {
+  if (!_runtime) {
+    throw new Error("[{{CHANNEL_ID}}] Runtime not initialized");
+  }
+  return _runtime;
+}
+
+/**
+ * Get OpenClaw config
+ */
+export function getConfig() {
+  return _openclawConfig;
+}
+
+// =============================================================================
+// Plugin Definition
+// =============================================================================
+
+const plugin = {
+  id: "{{CHANNEL_ID}}",
+  name: "{{CHANNEL_LABEL}}",
+  description: "{{CHANNEL_LABEL}} channel plugin for OpenClaw",
+  configSchema: { type: "object", additionalProperties: false, properties: {} },
+
+  /**
+   * Register the plugin with OpenClaw
+   * @param {OpenClawPluginApi} api - The plugin API
+   */
+  register(api) {
+    logger.info("{{CHANNEL_LABEL}} plugin registering...");
+
+    // Save runtime and config references
+    setRuntime(api.runtime);
+    _openclawConfig = api.config;
+
+    // Register channel plugin
+    const channelPlugin = create{{CHANNEL_CLASS}}ChannelPlugin({ defaultAccountId: DEFAULT_ACCOUNT_ID });
+    api.registerChannel({ plugin: channelPlugin });
+    logger.info("{{CHANNEL_LABEL}} channel registered");
+
+    // Register HTTP handler for webhooks
+    const httpHandler = create{{CHANNEL_CLASS}}HttpHandler({ defaultAccountId: DEFAULT_ACCOUNT_ID });
+    api.registerHttpHandler(httpHandler);
+    logger.info("{{CHANNEL_LABEL}} HTTP handler registered");
+  },
+};
+
+export default plugin;
+export const register = (api) => plugin.register(api);

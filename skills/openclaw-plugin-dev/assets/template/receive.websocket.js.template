@@ -1,0 +1,258 @@
+/**
+ * OpenClaw {{CHANNEL_LABEL}} WebSocket Provider
+ *
+ * This file handles WebSocket connections for receiving messages.
+ * Use this template for channels that support WebSocket (like Feishu/Lark).
+ */
+
+import { logger } from "./logger.js";
+import { getRuntime } from "./index.js";
+
+// =============================================================================
+// TODO: Import your channel's SDK
+// =============================================================================
+// Example for Feishu:
+// import * as Lark from "@larksuiteoapi/node-sdk";
+
+// =============================================================================
+// TODO: Channel-Specific Constants
+// =============================================================================
+const THINKING_THRESHOLD_MS = 2500;  // Show "thinking" after this delay
+const THINKING_MESSAGE = "正在思考...";
+
+// =============================================================================
+// WebSocket Provider Factory
+// =============================================================================
+
+/**
+ * Provider options
+ * @typedef {Object} WebSocketProviderOptions
+ * @property {Object} account - Resolved account
+ * @property {Object} config - OpenClaw config
+ * @property {Object} log - Logger
+ * @property {AbortSignal} [abortSignal] - Abort signal
+ * @property {Function} [statusSink] - Status update callback
+ */
+
+/**
+ * Start the WebSocket provider
+ * TODO: Implement channel-specific WebSocket connection
+ *
+ * @param {WebSocketProviderOptions} options
+ * @returns {{ stop: Function }} Stop function
+ */
+export function startWebSocketProvider(options) {
+  const { account, config, log, abortSignal, statusSink } = options;
+  const { /* TODO: channel credentials */ } = account;
+
+  log.info(`[{{CHANNEL_ID}}:${account.accountId}] Starting WebSocket provider`);
+
+  // ===========================================================================
+  // TODO: Create SDK client
+  // ===========================================================================
+  // Example for Feishu:
+  // const sdkConfig = {
+  //   appId: account.appId,
+  //   appSecret: account.appSecret,
+  //   domain: Lark.Domain.Feishu,
+  //   appType: Lark.AppType.SelfBuild,
+  // };
+  // const client = new Lark.Client(sdkConfig);
+
+  // ===========================================================================
+  // TODO: Create event dispatcher
+  // ===========================================================================
+  // Example for Feishu:
+  // const dispatcher = new Lark.EventDispatcher({}).register({
+  //   "im.message.receive_v1": async (data) => {
+  //     await handleIncomingMessage(data, { client, account, config, log, statusSink });
+  //   },
+  // });
+
+  // ===========================================================================
+  // TODO: Create and start WebSocket client
+  // ===========================================================================
+  // Example for Feishu:
+  // const wsClient = new Lark.WSClient({
+  //   ...sdkConfig,
+  //   loggerLevel: Lark.LoggerLevel.info,
+  // });
+  // wsClient.start({ eventDispatcher: dispatcher });
+
+  log.info(`[{{CHANNEL_ID}}:${account.accountId}] WebSocket client started`);
+  statusSink?.({ running: true, lastStartAt: Date.now() });
+
+  // ===========================================================================
+  // Return stop function
+  // ===========================================================================
+  const stop = () => {
+    log.info(`[{{CHANNEL_ID}}:${account.accountId}] Stopping WebSocket provider`);
+    // TODO: Clean up WebSocket connection
+    // - Close connection
+    // - Clear timers
+    // - Remove listeners
+    statusSink?.({ running: false, lastStopAt: Date.now() });
+  };
+
+  return { stop };
+}
+
+// =============================================================================
+// Message Handler
+// =============================================================================
+
+/**
+ * Handle incoming WebSocket message
+ * TODO: Implement channel-specific message handling
+ *
+ * @param {Object} data - Raw message data from WebSocket
+ * @param {Object} ctx - Handler context
+ */
+async function handleIncomingMessage(data, ctx) {
+  const { client, account, config, log, statusSink } = ctx;
+
+  // ===========================================================================
+  // TODO: Parse message
+  // ===========================================================================
+  // Extract:
+  // - messageId (for deduplication)
+  // - chatId (conversation ID)
+  // - senderId (user ID)
+  // - chatType ("single" | "group")
+  // - messageType ("text" | "image" | "file")
+  // - content (message text or media URL)
+
+  // Example:
+  // const message = data.message;
+  // if (!message) return;
+  //
+  // const messageId = message.message_id;
+  // if (isDuplicate(messageId)) return;
+  //
+  // const chatId = message.chat_id;
+  // const chatType = message.chat_type === "p2p" ? "single" : "group";
+  // const senderId = data.sender?.sender_id?.open_id;
+  // const content = JSON.parse(message.content).text;
+
+  // ===========================================================================
+  // TODO: Group mention filtering (if applicable)
+  // ===========================================================================
+  // if (chatType === "group") {
+  //   const mentions = message.mentions || [];
+  //   if (!shouldRespondInGroup(content, mentions)) return;
+  //   // Strip @mention from content
+  // }
+
+  statusSink?.({ lastInboundAt: Date.now() });
+
+  const sessionKey = `{{CHANNEL_ID}}:${chatType === "single" ? senderId : chatId}`;
+
+  log.info(`[{{CHANNEL_ID}}:${account.accountId}] Received from ${senderId}: ${content?.slice(0, 80)}`);
+
+  // ===========================================================================
+  // Dispatch to OpenClaw
+  // ===========================================================================
+  const runtime = getRuntime();
+  const channel = runtime.channel;
+
+  const inboundCtx = {
+    Body: content,
+    RawBody: content,
+    CommandBody: content,
+    From: senderId,
+    To: chatId,
+    SessionKey: sessionKey,
+    AccountId: account.accountId,
+    MessageSid: messageId,
+    ChatType: chatType,
+    ConversationLabel: chatId,
+    SenderId: senderId,
+    CommandAuthorized: true,
+    Provider: "{{CHANNEL_ID}}",
+    Surface: "{{CHANNEL_ID}}",
+    OriginatingChannel: "{{CHANNEL_ID}}",
+    OriginatingTo: chatId,
+    DeliveryContext: {
+      channel: "{{CHANNEL_ID}}",
+      to: chatId,
+      accountId: account.accountId,
+    },
+  };
+
+  // ===========================================================================
+  // "Thinking" placeholder logic
+  // ===========================================================================
+  let placeholderId = "";
+  let done = false;
+  const timer = THINKING_THRESHOLD_MS > 0
+    ? setTimeout(async () => {
+        if (done) return;
+        try {
+          // TODO: Send "thinking" placeholder message
+          // placeholderId = await sendPlaceholderMessage(client, chatId, THINKING_MESSAGE);
+        } catch {
+          // Ignore placeholder failures
+        }
+      }, THINKING_THRESHOLD_MS)
+    : null;
+
+  try {
+    await channel.reply.dispatchReplyWithBufferedBlockDispatcher({
+      ctx: inboundCtx,
+      cfg: runtime.config.loadConfig(),
+      replyResolver: null,
+      dispatcherOptions: {
+        deliver: async (payload) => {
+          done = true;
+          if (timer) clearTimeout(timer);
+
+          const replyText = typeof payload === "string" ? payload : (payload.text || payload.body || "");
+          const mediaUrl = payload.mediaUrl || payload.mediaUrls?.[0];
+
+          // Skip empty / NO_REPLY
+          const trimmed = (replyText || "").trim();
+          if ((!trimmed || trimmed === "NO_REPLY") && !mediaUrl) {
+            // TODO: Delete placeholder if exists
+            // if (placeholderId) await deleteMessage(client, placeholderId);
+            return;
+          }
+
+          statusSink?.({ lastOutboundAt: Date.now() });
+
+          try {
+            if (mediaUrl) {
+              // TODO: Delete placeholder, send media
+              // if (placeholderId) await deleteMessage(client, placeholderId);
+              // await sendMediaMessage(client, chatId, mediaUrl, replyText);
+            } else if (placeholderId) {
+              // TODO: Update placeholder with reply
+              // await updateMessage(client, placeholderId, replyText);
+            } else {
+              // TODO: Send new text message
+              // await sendTextMessage(client, chatId, replyText);
+            }
+          } catch (err) {
+            log.error(`[{{CHANNEL_ID}}:${account.accountId}] Failed to send reply: ${err.message}`);
+          }
+        },
+        onError: (err) => {
+          done = true;
+          if (timer) clearTimeout(timer);
+          log.error(`[{{CHANNEL_ID}}:${account.accountId}] Dispatcher error: ${err.message}`);
+          // TODO: Clean up placeholder
+          // if (placeholderId) deleteMessage(client, placeholderId).catch(() => {});
+        },
+      },
+    });
+  } catch (err) {
+    done = true;
+    if (timer) clearTimeout(timer);
+    log.error(`[{{CHANNEL_ID}}:${account.accountId}] Dispatch error: ${err.message}`);
+    // TODO: Clean up placeholder
+  }
+}
+
+// =============================================================================
+// Deduplication (shared with webhook)
+// =============================================================================
+// Import from utils.js or implement here

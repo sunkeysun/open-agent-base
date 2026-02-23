@@ -1,0 +1,166 @@
+/**
+ * {{CHANNEL_LABEL}} Channel Plugin Tests
+ *
+ * Run with: node --test tests/channel.test.js
+ */
+
+import { describe, it, beforeEach, afterEach } from "node:test";
+import assert from "node:assert";
+import {
+  createMockRuntime,
+  createMockApi,
+  createMockAccount,
+} from "./mock-runtime.js";
+
+// TODO: Import your channel plugin factory
+// import { create{{CHANNEL_CLASS}}ChannelPlugin } from "../channel.js";
+
+describe("{{CHANNEL_LABEL}} Channel Plugin", () => {
+  let mockConfig;
+  let mockRuntime;
+  let mockApi;
+  let channelPlugin;
+
+  beforeEach(() => {
+    // Setup mock config
+    mockConfig = {
+      channels: {
+        {{CHANNEL_ID}}: {
+          enabled: true,
+          // TODO: Add your channel config
+        },
+      },
+    };
+
+    // Setup mock runtime
+    mockRuntime = createMockRuntime({ config: mockConfig });
+
+    // Setup mock API
+    mockApi = createMockApi(mockRuntime);
+
+    // TODO: Create channel plugin
+    // channelPlugin = create{{CHANNEL_CLASS}}ChannelPlugin({ defaultAccountId: "default" });
+  });
+
+  afterEach(() => {
+    // Cleanup
+  });
+
+  // ===========================================================================
+  // Config Adapter Tests
+  // ===========================================================================
+
+  describe("config adapter", () => {
+    it("should list account IDs correctly", () => {
+      // TODO: Implement test
+      // const ids = channelPlugin.config.listAccountIds(mockConfig);
+      // assert.deepStrictEqual(ids, ["default"]);
+      assert.ok(true, "TODO: Implement test");
+    });
+
+    it("should resolve account correctly", () => {
+      // TODO: Implement test
+      // const account = channelPlugin.config.resolveAccount(mockConfig, "default");
+      // assert.strictEqual(account.enabled, true);
+      assert.ok(true, "TODO: Implement test");
+    });
+
+    it("should return null for disabled channel", () => {
+      // TODO: Implement test
+      // mockConfig.channels.{{CHANNEL_ID}}.enabled = false;
+      // const ids = channelPlugin.config.listAccountIds(mockConfig);
+      // assert.deepStrictEqual(ids, []);
+      assert.ok(true, "TODO: Implement test");
+    });
+
+    it("should set account enabled status", () => {
+      // TODO: Implement test
+      // const result = channelPlugin.config.setAccountEnabled({
+      //   cfg: { ...mockConfig },
+      //   accountId: "default",
+      //   enabled: false,
+      // });
+      // assert.strictEqual(result.channels.{{CHANNEL_ID}}.enabled, false);
+      assert.ok(true, "TODO: Implement test");
+    });
+
+    it("should delete account from config", () => {
+      // TODO: Implement test
+      // const result = channelPlugin.config.deleteAccount({
+      //   cfg: { ...mockConfig },
+      //   accountId: "default",
+      // });
+      // assert.strictEqual(result.channels.{{CHANNEL_ID}}, undefined);
+      assert.ok(true, "TODO: Implement test");
+    });
+  });
+
+  // ===========================================================================
+  // Outbound Adapter Tests
+  // ===========================================================================
+
+  describe("outbound adapter", () => {
+    it("should send text message", async () => {
+      // TODO: Implement test
+      // const result = await channelPlugin.outbound.sendText({
+      //   cfg: mockConfig,
+      //   to: "{{CHANNEL_ID}}:user123",
+      //   text: "Hello, World!",
+      //   accountId: "default",
+      // });
+      // assert.strictEqual(result.channel, "{{CHANNEL_ID}}");
+      // assert.ok(result.messageId);
+      assert.ok(true, "TODO: Implement test");
+    });
+
+    it("should strip channel prefix from recipient", async () => {
+      // TODO: Implement test
+      // Verify that {{CHANNEL_ID}}: prefix is stripped
+      assert.ok(true, "TODO: Implement test");
+    });
+
+    it("should send media message", async () => {
+      // TODO: Implement test
+      // const result = await channelPlugin.outbound.sendMedia({
+      //   cfg: mockConfig,
+      //   to: "{{CHANNEL_ID}}:user123",
+      //   text: "Image caption",
+      //   mediaUrl: "https://example.com/image.jpg",
+      //   accountId: "default",
+      // });
+      // assert.strictEqual(result.channel, "{{CHANNEL_ID}}");
+      assert.ok(true, "TODO: Implement test");
+    });
+  });
+
+  // ===========================================================================
+  // Gateway Adapter Tests
+  // ===========================================================================
+
+  describe("gateway adapter", () => {
+    it("should start and shutdown gateway", async () => {
+      // TODO: Implement test
+      // const gateway = await channelPlugin.gateway.startAccount({
+      //   account: createMockAccount(),
+      //   cfg: mockConfig,
+      // });
+      // assert.ok(gateway);
+      // assert.ok(gateway.shutdown);
+      // await gateway.shutdown();
+      assert.ok(true, "TODO: Implement test");
+    });
+  });
+
+  // ===========================================================================
+  // Plugin Registration Tests
+  // ===========================================================================
+
+  describe("plugin registration", () => {
+    it("should register without errors", () => {
+      // TODO: Import and test plugin registration
+      // import plugin from "../index.js";
+      // assert.doesNotThrow(() => plugin.register(mockApi));
+      assert.ok(true, "TODO: Implement test");
+    });
+  });
+});

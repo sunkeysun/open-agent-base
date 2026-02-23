@@ -1,0 +1,389 @@
+/**
+ * OpenClaw {{CHANNEL_LABEL}} Webhook Handler
+ *
+ * This file handles incoming HTTP requests from the channel platform.
+ * Fill in the TODO sections with your channel-specific webhook logic.
+ */
+
+import { logger } from "./logger.js";
+import { getRuntime, getConfig } from "./index.js";
+
+// Webhook targets registry (for multi-account support)
+const webhookTargets = new Map();
+
+/**
+ * Normalize webhook path
+ */
+function normalizeWebhookPath(raw) {
+  const trimmed = (raw || "").trim();
+  if (!trimmed) return "/";
+  const withSlash = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+  if (withSlash.length > 1 && withSlash.endsWith("/")) {
+    return withSlash.slice(0, -1);
+  }
+  return withSlash;
+}
+
+/**
+ * Register a webhook target
+ */
+export function registerWebhookTarget(target) {
+  const key = normalizeWebhookPath(target.path);
+  const entry = { ...target, path: key };
+  webhookTargets.set(key, entry);
+  return () => {
+    webhookTargets.delete(key);
+  };
+}
+
+/**
+ * Create HTTP handler for {{CHANNEL_LABEL}} webhooks
+ * @param {Object} options - Handler options
+ * @param {string} options.defaultAccountId - Default account ID
+ * @returns {Function} HTTP handler function
+ */
+export function create{{CHANNEL_CLASS}}HttpHandler({ defaultAccountId }) {
+  /**
+   * HTTP handler function
+   * @param {IncomingMessage} req - HTTP request
+   * @param {ServerResponse} res - HTTP response
+   * @returns {Promise<boolean>} Whether the request was handled
+   */
+  return async function {{CHANNEL_CLASS}}HttpHandler(req, res) {
+    const url = new URL(req.url || "", "http://localhost");
+    const path = normalizeWebhookPath(url.pathname);
+
+    // Check if this request is for our webhook
+    const target = webhookTargets.get(path);
+    if (!target) {
+      return false; // Not handled by this plugin
+    }
+
+    const query = Object.fromEntries(url.searchParams);
+    logger.debug("{{CHANNEL_LABEL}} HTTP request", { method: req.method, path });
+
+    // =========================================================================
+    // TODO: Handle URL Verification (if channel requires it)
+    // =========================================================================
+    // Many channels require a GET endpoint for URL verification
+    if (req.method === "GET") {
+      // TODO: Implement URL verification challenge
+      // Example:
+      // const challenge = query.challenge || query.echostr;
+      // if (challenge) {
+      //   // Verify signature if required
+      //   res.writeHead(200, { "Content-Type": "text/plain" });
+      //   res.end(challenge);
+      //   return true;
+      // }
+
+      res.writeHead(405, { "Content-Type": "text/plain" });
+      res.end("Method Not Allowed");
+      return true;
+    }
+
+    // =========================================================================
+    // Handle POST: Message Webhook
+    // =========================================================================
+    if (req.method === "POST") {
+      // Read request body
+      const chunks = [];
+      for await (const chunk of req) {
+        chunks.push(chunk);
+      }
+      const body = Buffer.concat(chunks).toString("utf-8");
+
+      logger.debug("{{CHANNEL_LABEL}} webhook received", { bodyLength: body.length });
+
+      // TODO: Parse request body based on channel format
+      // Common formats: JSON, XML, form-urlencoded
+      let data;
+      try {
+        data = JSON.parse(body);
+      } catch (e) {
+        logger.warn("Failed to parse webhook body", { error: e.message });
+        res.writeHead(400, { "Content-Type": "text/plain" });
+        res.end("Bad Request");
+        return true;
+      }
+
+      // TODO: Verify webhook signature (if channel requires it)
+      // Example:
+      // const signature = req.headers["x-signature"];
+      // if (!verifySignature(body, signature, target.account.secret)) {
+      //   res.writeHead(401, { "Content-Type": "text/plain" });
+      //   res.end("Unauthorized");
+      //   return true;
+      // }
+
+      // TODO: Check for duplicate messages (idempotency)
+      // Example:
+      // const messageId = data.id || data.message_id;
+      // if (await isDuplicate(messageId)) {
+      //   res.writeHead(200, { "Content-Type": "text/plain" });
+      //   res.end("OK (duplicate)");
+      //   return true;
+      // }
+
+      try {
+        // =====================================================================
+        // TODO: Parse channel-specific message format
+        // =====================================================================
+        const parsedMessage = await parseMessage(data, target);
+
+        if (!parsedMessage) {
+          // Not a message we handle (e.g., event, status update)
+          res.writeHead(200, { "Content-Type": "text/plain" });
+          res.end("OK");
+          return true;
+        }
+
+        // =====================================================================
+        // Process the message through OpenClaw
+        // =====================================================================
+        await processInboundMessage({
+          message: parsedMessage,
+          account: target.account,
+          config: target.config,
+          // TODO: Add any additional context needed
+        });
+
+        // TODO: Return appropriate response based on channel requirements
+        // Some channels expect immediate ACK, others expect specific format
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ status: "ok" }));
+        return true;
+
+      } catch (error) {
+        logger.error("Failed to process webhook", { error: error.message });
+
+        // TODO: Return appropriate error response
+        res.writeHead(500, { "Content-Type": "text/plain" });
+        res.end("Internal Server Error");
+        return true;
+      }
+    }
+
+    res.writeHead(405, { "Content-Type": "text/plain" });
+    res.end("Method Not Allowed");
+    return true;
+  };
+}
+
+// =============================================================================
+// Message Parsing (Channel-Specific)
+// =============================================================================
+
+/**
+ * Parse incoming webhook data into standard message format
+ * TODO: Implement channel-specific message parsing
+ *
+ * @param {Object} data - Raw webhook data
+ * @param {Object} target - Webhook target
+ * @returns {Promise<Object|null>} Parsed message or null if not a message
+ */
+async function parseMessage(data, target) {
+  // TODO: Implement channel-specific message parsing
+  //
+  // Return an object with these fields:
+  // {
+  //   fromUser: string,      // Sender ID
+  //   content: string,       // Message text content
+  //   chatType: "single" | "group",  // Chat type
+  //   chatId?: string,       // Group/chat ID (for group messages)
+  //   msgType: string,       // Message type: "text", "image", "file", etc.
+  //   imageUrl?: string,     // Image URL (for image messages)
+  //   fileUrl?: string,      // File URL (for file messages)
+  //   fileName?: string,     // File name (for file messages)
+  //   timestamp?: number,    // Message timestamp
+  //   raw: object,           // Original message data
+  // }
+  //
+  // Return null if this is not a message (e.g., event, status update)
+
+  // Example implementation:
+  // if (data.type === "message") {
+  //   return {
+  //     fromUser: data.sender.id,
+  //     content: data.content.text || "",
+  //     chatType: data.chat.type === "group" ? "group" : "single",
+  //     chatId: data.chat.id,
+  //     msgType: data.content.type,
+  //     imageUrl: data.content.image_url,
+  //     timestamp: data.timestamp,
+  //     raw: data,
+  //   };
+  // }
+  // return null;
+
+  logger.warn("parseMessage not implemented", { data });
+  return null;
+}
+
+// =============================================================================
+// Message Processing
+// =============================================================================
+
+/**
+ * Process inbound message through OpenClaw
+ * TODO: Customize for channel-specific needs
+ *
+ * @param {Object} params - Process parameters
+ * @param {Object} params.message - Parsed message
+ * @param {Object} params.account - Resolved account
+ * @param {Object} params.config - OpenClaw config
+ */
+async function processInboundMessage({ message, account, config }) {
+  const runtime = getRuntime();
+  const core = runtime.channel;
+
+  const senderId = message.fromUser;
+  const msgType = message.msgType || "text";
+  const rawContent = message.content || "";
+  const chatType = message.chatType || "single";
+  const chatId = message.chatId || "";
+  const isGroupChat = chatType === "group" && chatId;
+
+  // Use chat ID for group sessions, sender ID for direct messages
+  const peerId = isGroupChat ? chatId : senderId;
+  const peerKind = isGroupChat ? "group" : "dm";
+  const conversationId = isGroupChat
+    ? `{{CHANNEL_ID}}:group:${chatId}`
+    : `{{CHANNEL_ID}}:${senderId}`;
+
+  logger.info("Processing inbound message", {
+    from: senderId,
+    chatType: peerKind,
+    content: rawContent.substring(0, 50),
+  });
+
+  // ==========================================================================
+  // TODO: Add channel-specific preprocessing
+  // ==========================================================================
+  // Examples:
+  // - Group mention gating (only respond when @mentioned)
+  // - Message filtering
+  // - Admin user detection
+  // - Command allowlist checking
+
+  // ==========================================================================
+  // Resolve route
+  // ==========================================================================
+  const route = core.routing.resolveAgentRoute({
+    cfg: config,
+    channel: "{{CHANNEL_ID}}",
+    accountId: account.accountId,
+    peer: {
+      kind: peerKind,
+      id: peerId,
+    },
+  });
+
+  // ==========================================================================
+  // Build inbound context
+  // ==========================================================================
+  const storePath = core.session.resolveStorePath(config.session?.store, {
+    agentId: route.agentId,
+  });
+  const envelopeOptions = core.reply.resolveEnvelopeFormatOptions(config);
+  const previousTimestamp = core.session.readSessionUpdatedAt({
+    storePath,
+    sessionKey: route.sessionKey,
+  });
+
+  // Prefix sender ID in group contexts
+  const senderLabel = isGroupChat ? `[${senderId}]` : senderId;
+  const body = core.reply.formatAgentEnvelope({
+    channel: isGroupChat ? "{{CHANNEL_LABEL}} Group" : "{{CHANNEL_LABEL}}",
+    from: senderLabel,
+    timestamp: Date.now(),
+    previousTimestamp,
+    envelope: envelopeOptions,
+    body: rawContent,
+  });
+
+  // ==========================================================================
+  // TODO: Handle media attachments
+  // ==========================================================================
+  // If message contains images or files, download and attach them
+  // Example:
+  // const mediaPaths = [];
+  // const mediaTypes = [];
+  // if (message.imageUrl) {
+  //   const localPath = await downloadMedia(message.imageUrl, account);
+  //   mediaPaths.push(localPath);
+  //   mediaTypes.push("image/jpeg");
+  // }
+
+  // ==========================================================================
+  // Build context payload
+  // ==========================================================================
+  const ctxPayload = core.reply.finalizeInboundContext({
+    Body: body,
+    RawBody: rawContent,
+    CommandBody: rawContent,
+    From: `{{CHANNEL_ID}}:${senderId}`,
+    To: conversationId,
+    SessionKey: route.sessionKey,
+    AccountId: route.accountId,
+    ChatType: isGroupChat ? "group" : "direct",
+    ConversationLabel: isGroupChat ? `Group ${chatId}` : senderId,
+    SenderName: senderId,
+    SenderId: senderId,
+    GroupId: isGroupChat ? chatId : undefined,
+    Provider: "{{CHANNEL_ID}}",
+    Surface: "{{CHANNEL_ID}}",
+    OriginatingChannel: "{{CHANNEL_ID}}",
+    OriginatingTo: conversationId,
+    CommandAuthorized: true,
+    // TODO: Add media if present
+    // MediaPaths: mediaPaths,
+    // MediaTypes: mediaTypes,
+  });
+
+  // ==========================================================================
+  // Record session metadata
+  // ==========================================================================
+  void core.session
+    .recordSessionMetaFromInbound({
+      storePath,
+      sessionKey: ctxPayload.SessionKey ?? route.sessionKey,
+      ctx: ctxPayload,
+    })
+    .catch((err) => {
+      logger.error("Failed to update session meta", { error: err.message });
+    });
+
+  // ==========================================================================
+  // Dispatch reply through OpenClaw
+  // ==========================================================================
+  await core.reply.dispatchReplyWithBufferedBlockDispatcher({
+    ctx: ctxPayload,
+    cfg: config,
+    dispatcherOptions: {
+      deliver: async (payload, info) => {
+        logger.info("Delivering reply", {
+          kind: info.kind,
+          textPreview: (payload.text || "").substring(0, 50),
+        });
+
+        // ==========================================================================
+        // TODO: Deliver reply to channel
+        // ==========================================================================
+        // Use outbound adapter or direct API call to send the reply
+        // Example:
+        // const channelPlugin = create{{CHANNEL_CLASS}}ChannelPlugin({ defaultAccountId: "default" });
+        // await channelPlugin.outbound.sendText({
+        //   cfg: config,
+        //   to: isGroupChat ? chatId : senderId,
+        //   text: payload.text,
+        //   accountId: account.accountId,
+        // });
+      },
+      onError: async (err, info) => {
+        logger.error("Reply failed", { error: err.message, kind: info.kind });
+        // TODO: Handle error (send error message to user, log, etc.)
+      },
+    },
+  });
+}

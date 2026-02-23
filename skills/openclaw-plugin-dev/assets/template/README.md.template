@@ -1,0 +1,107 @@
+# OpenClaw {{CHANNEL_LABEL}} Plugin
+
+{{CHANNEL_LABEL}} channel plugin for [OpenClaw](https://github.com/openclaw/openclaw).
+
+## Features
+
+- TODO: List your plugin features
+
+## Requirements
+
+- OpenClaw 2026.1.30+
+- TODO: List any additional requirements
+
+## Installation
+
+```bash
+openclaw plugins install {{NPM_SCOPE}}/{{CHANNEL_ID}}
+```
+
+## Configuration
+
+Add to your OpenClaw config (`~/.openclaw/openclaw.json`):
+
+```json
+{
+  "plugins": {
+    "entries": {
+      "{{CHANNEL_ID}}": {
+        "enabled": true
+      }
+    }
+  },
+  "channels": {
+    "{{CHANNEL_ID}}": {
+      "enabled": true,
+      "TODO": "Add channel-specific config"
+    }
+  }
+}
+```
+
+### Configuration Options
+
+| Option | Type | Required | Description |
+|--------|------|----------|-------------|
+| `enabled` | boolean | Yes | Enable the channel |
+| TODO | | | Add channel-specific options |
+
+## Platform Setup
+
+TODO: Add platform-specific setup instructions (e.g., creating bot, getting credentials)
+
+1. Step 1
+2. Step 2
+3. ...
+
+## Supported Message Types
+
+| Type | Inbound | Outbound | Notes |
+|------|---------|----------|-------|
+| Text | ✅ | ✅ | |
+| Image | TODO | TODO | |
+| File | TODO | TODO | |
+
+## Development
+
+### Run Tests
+
+```bash
+npm test
+```
+
+### Run Tests in Watch Mode
+
+```bash
+npm run test:watch
+```
+
+### Local Development
+
+```bash
+# Link to local OpenClaw
+cd /path/to/openclaw
+openclaw plugins install /path/to/this/plugin
+```
+
+## Project Structure
+
+```
+openclaw-plugin-{{CHANNEL_ID}}/
+├── index.js              # Plugin entry point
+├── channel.js            # Channel plugin definition
+├── webhook.js            # Webhook handler
+├── logger.js             # Logging utility
+├── utils.js              # Helper functions
+├── tests/
+│   ├── mock-runtime.js   # Mock runtime for testing
+│   ├── channel.test.js   # Channel tests
+│   └── webhook.test.js   # Webhook tests
+├── package.json          # npm package config
+├── openclaw.plugin.json  # OpenClaw plugin manifest
+└── README.md             # This file
+```
+
+## License
+
+ISC

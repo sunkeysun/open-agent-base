@@ -1,0 +1,47 @@
+{
+  "name": "{{NPM_SCOPE}}/{{CHANNEL_ID}}",
+  "version": "1.0.0",
+  "description": "{{CHANNEL_LABEL}} channel plugin for OpenClaw",
+  "type": "module",
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "channel.js",
+    "webhook.js",
+    "logger.js",
+    "utils.js",
+    "openclaw.plugin.json",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "openclaw": "*"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "test:watch": "node --test --watch tests/*.test.js"
+  },
+  "openclaw": {
+    "extensions": ["./index.js"],
+    "channel": {
+      "id": "{{CHANNEL_ID}}",
+      "label": "{{CHANNEL_LABEL}}",
+      "selectionLabel": "{{CHANNEL_LABEL}} (AI Bot)",
+      "docsPath": "/channels/{{CHANNEL_ID}}",
+      "blurb": "{{CHANNEL_LABEL}} integration for OpenClaw",
+      "order": 100,
+      "aliases": {{CHANNEL_ALIASES_JSON}}
+    },
+    "install": {
+      "defaultChoice": "npm",
+      "npmSpec": "{{NPM_SCOPE}}/{{CHANNEL_ID}}"
+    }
+  },
+  "keywords": [
+    "openclaw",
+    "{{CHANNEL_ID}}",
+    "plugin",
+    "channel"
+  ],
+  "author": "",
+  "license": "ISC"
+}

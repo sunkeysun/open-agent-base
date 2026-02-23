@@ -1,0 +1,202 @@
+/**
+ * {{CHANNEL_LABEL}} Webhook Handler Tests
+ *
+ * Run with: node --test tests/webhook.test.js
+ */
+
+import { describe, it, beforeEach, afterEach } from "node:test";
+import assert from "node:assert";
+import {
+  createMockRuntime,
+  createMockApi,
+  createMockRequest,
+  createMockResponse,
+  createMockAccount,
+} from "./mock-runtime.js";
+
+// TODO: Import your webhook handler
+// import { create{{CHANNEL_CLASS}}HttpHandler, registerWebhookTarget } from "../webhook.js";
+
+describe("{{CHANNEL_LABEL}} Webhook Handler", () => {
+  let mockConfig;
+  let mockRuntime;
+  let httpHandler;
+
+  beforeEach(() => {
+    mockConfig = {
+      channels: {
+        {{CHANNEL_ID}}: {
+          enabled: true,
+          // TODO: Add your channel config
+        },
+      },
+    };
+
+    mockRuntime = createMockRuntime({ config: mockConfig });
+
+    // TODO: Create HTTP handler
+    // httpHandler = create{{CHANNEL_CLASS}}HttpHandler({ defaultAccountId: "default" });
+
+    // TODO: Register webhook target
+    // registerWebhookTarget({
+    //   path: "/webhooks/{{CHANNEL_ID}}",
+    //   account: createMockAccount(),
+    //   config: mockConfig,
+    // });
+  });
+
+  afterEach(() => {
+    // Cleanup
+  });
+
+  // ===========================================================================
+  // Path Matching Tests
+  // ===========================================================================
+
+  describe("path matching", () => {
+    it("should handle requests to /webhooks/{{CHANNEL_ID}}", async () => {
+      // TODO: Implement test
+      // const req = createMockRequest({
+      //   url: "/webhooks/{{CHANNEL_ID}}",
+      //   method: "POST",
+      //   body: { type: "message", content: "test" },
+      // });
+      // const res = createMockResponse();
+      //
+      // const handled = await httpHandler(req, res);
+      // assert.strictEqual(handled, true);
+      assert.ok(true, "TODO: Implement test");
+    });
+
+    it("should not handle requests to other paths", async () => {
+      // TODO: Implement test
+      // const req = createMockRequest({
+      //   url: "/other/path",
+      //   method: "POST",
+      //   body: {},
+      // });
+      // const res = createMockResponse();
+      //
+      // const handled = await httpHandler(req, res);
+      // assert.strictEqual(handled, false);
+      assert.ok(true, "TODO: Implement test");
+    });
+  });
+
+  // ===========================================================================
+  // HTTP Method Tests
+  // ===========================================================================
+
+  describe("HTTP methods", () => {
+    it("should handle POST requests", async () => {
+      // TODO: Implement test
+      // const req = createMockRequest({
+      //   method: "POST",
+      //   body: { type: "message" },
+      // });
+      // const res = createMockResponse();
+      //
+      // await httpHandler(req, res);
+      // assert.strictEqual(res._getStatusCode(), 200);
+      assert.ok(true, "TODO: Implement test");
+    });
+
+    it("should return 405 for unsupported methods", async () => {
+      // TODO: Implement test
+      // const req = createMockRequest({
+      //   method: "PUT",
+      //   body: {},
+      // });
+      // const res = createMockResponse();
+      //
+      // await httpHandler(req, res);
+      // assert.strictEqual(res._getStatusCode(), 405);
+      assert.ok(true, "TODO: Implement test");
+    });
+
+    // TODO: Add GET handler test if channel requires URL verification
+    // it("should handle GET for URL verification", async () => {
+    //   // ...
+    // });
+  });
+
+  // ===========================================================================
+  // Message Parsing Tests
+  // ===========================================================================
+
+  describe("message parsing", () => {
+    it("should parse text message correctly", async () => {
+      // TODO: Implement test
+      // Test that text messages are parsed into the correct format
+      assert.ok(true, "TODO: Implement test");
+    });
+
+    it("should parse image message correctly", async () => {
+      // TODO: Implement test
+      // Test that image messages are parsed with imageUrl
+      assert.ok(true, "TODO: Implement test");
+    });
+
+    it("should parse group message correctly", async () => {
+      // TODO: Implement test
+      // Test that group messages have chatType="group" and chatId
+      assert.ok(true, "TODO: Implement test");
+    });
+
+    it("should return null for non-message events", async () => {
+      // TODO: Implement test
+      // Test that events (not messages) return null
+      assert.ok(true, "TODO: Implement test");
+    });
+  });
+
+  // ===========================================================================
+  // Error Handling Tests
+  // ===========================================================================
+
+  describe("error handling", () => {
+    it("should return 400 for invalid JSON", async () => {
+      // TODO: Implement test
+      // const req = createMockRequest({
+      //   method: "POST",
+      //   body: "invalid json",
+      // });
+      // const res = createMockResponse();
+      //
+      // await httpHandler(req, res);
+      // assert.strictEqual(res._getStatusCode(), 400);
+      assert.ok(true, "TODO: Implement test");
+    });
+
+    it("should return 401 for invalid signature", async () => {
+      // TODO: Implement test (if channel uses signature verification)
+      assert.ok(true, "TODO: Implement test");
+    });
+
+    it("should handle duplicate messages", async () => {
+      // TODO: Implement test
+      // Test that duplicate messages are detected and ACKed
+      assert.ok(true, "TODO: Implement test");
+    });
+  });
+
+  // ===========================================================================
+  // Response Format Tests
+  // ===========================================================================
+
+  describe("response format", () => {
+    it("should return JSON response for POST", async () => {
+      // TODO: Implement test
+      // const req = createMockRequest({
+      //   method: "POST",
+      //   body: { type: "message" },
+      // });
+      // const res = createMockResponse();
+      //
+      // await httpHandler(req, res);
+      // const json = res._getJSON();
+      // assert.strictEqual(json.status, "ok");
+      assert.ok(true, "TODO: Implement test");
+    });
+  });
+});

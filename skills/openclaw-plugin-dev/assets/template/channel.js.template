@@ -1,0 +1,327 @@
+/**
+ * OpenClaw {{CHANNEL_LABEL}} Channel Plugin
+ *
+ * This file defines the channel plugin implementation.
+ * Fill in the TODO sections with your channel-specific logic.
+ */
+
+import { logger } from "./logger.js";
+import { getRuntime } from "./index.js";
+
+// =============================================================================
+// TODO: Channel-Specific Constants
+// =============================================================================
+// Define any channel-specific constants here, e.g.:
+// - Thinking placeholder text
+// - Media cache directory
+// - Default debounce time
+// - API endpoints
+
+const THINKING_PLACEHOLDER = "Thinking...";
+
+// =============================================================================
+// Channel Plugin Factory
+// =============================================================================
+
+/**
+ * Create the {{CHANNEL_LABEL}} channel plugin
+ * @param {Object} options - Plugin options
+ * @param {string} options.defaultAccountId - Default account ID
+ * @returns {ChannelPlugin} The channel plugin
+ */
+export function create{{CHANNEL_CLASS}}ChannelPlugin({ defaultAccountId }) {
+  return {
+    // =========================================================================
+    // Required: Plugin ID and Metadata
+    // =========================================================================
+    id: "{{CHANNEL_ID}}",
+
+    meta: {
+      id: "{{CHANNEL_ID}}",
+      label: "{{CHANNEL_LABEL}}",
+      selectionLabel: "{{CHANNEL_LABEL}} (AI Bot)",
+      docsPath: "/channels/{{CHANNEL_ID}}",
+      blurb: "{{CHANNEL_LABEL}} integration for OpenClaw",
+      aliases: {{CHANNEL_ALIASES_JSON}},
+    },
+
+    // =========================================================================
+    // Required: Capabilities Declaration
+    // =========================================================================
+    // Update these based on your channel's capabilities
+    capabilities: {
+      chatTypes: ["direct", "group"],  // Supported: "direct", "group"
+      reactions: false,                 // Does channel support message reactions?
+      threads: false,                   // Does channel support threads/topics?
+      media: true,                      // Does channel support media (images, files)?
+      nativeCommands: false,            // Does channel have native slash commands?
+      blockStreaming: false,            // Does channel require blocking stream mode?
+    },
+
+    // =========================================================================
+    // Optional: Config Reload Prefixes
+    // =========================================================================
+    reload: {
+      configPrefixes: ["channels.{{CHANNEL_ID}}"],
+    },
+
+    // =========================================================================
+    // Required: Config Schema (JSON Schema format)
+    // =========================================================================
+    // TODO: Add your channel's configuration properties
+    configSchema: {
+      schema: {
+        $schema: "http://json-schema.org/draft-07/schema#",
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          enabled: {
+            type: "boolean",
+            description: "Enable {{CHANNEL_LABEL}} channel",
+            default: true,
+          },
+          // TODO: Add channel-specific config properties
+          // Examples:
+          // token: {
+          //   type: "string",
+          //   description: "API token",
+          // },
+          // secret: {
+          //   type: "string",
+          //   description: "API secret",
+          // },
+          // webhookPath: {
+          //   type: "string",
+          //   description: "Webhook path",
+          //   default: "/webhooks/{{CHANNEL_ID}}",
+          // },
+        },
+      },
+      uiHints: {
+        // TODO: Add UI hints for sensitive fields
+        // token: { sensitive: true, label: "API Token" },
+        // secret: { sensitive: true, label: "API Secret" },
+      },
+    },
+
+    // =========================================================================
+    // Required: Config Adapter
+    // =========================================================================
+    config: {
+      /**
+       * List all account IDs for this channel
+       * TODO: Modify if supporting multiple accounts
+       */
+      listAccountIds: (cfg) => {
+        const channel = cfg?.channels?.{{CHANNEL_ID}};
+        if (!channel || !channel.enabled) return [];
+        return [defaultAccountId];
+      },
+
+      /**
+       * Resolve account configuration
+       * TODO: Add your channel-specific account properties
+       */
+      resolveAccount: (cfg, accountId) => {
+        const channel = cfg?.channels?.{{CHANNEL_ID}};
+        if (!channel) return null;
+
+        return {
+          id: accountId || defaultAccountId,
+          accountId: accountId || defaultAccountId,
+          enabled: channel.enabled !== false,
+          // TODO: Add channel-specific properties
+          // token: channel.token || "",
+          // secret: channel.secret || "",
+          // webhookPath: channel.webhookPath || "/webhooks/{{CHANNEL_ID}}",
+          config: channel,
+        };
+      },
+
+      /**
+       * Get default account ID
+       */
+      defaultAccountId: (cfg) => {
+        const channel = cfg?.channels?.{{CHANNEL_ID}};
+        if (!channel || !channel.enabled) return null;
+        return defaultAccountId;
+      },
+
+      /**
+       * Set account enabled status
+       */
+      setAccountEnabled: ({ cfg, accountId, enabled }) => {
+        if (!cfg.channels) cfg.channels = {};
+        if (!cfg.channels.{{CHANNEL_ID}}) cfg.channels.{{CHANNEL_ID}} = {};
+        cfg.channels.{{CHANNEL_ID}}.enabled = enabled;
+        return cfg;
+      },
+
+      /**
+       * Delete account from config
+       */
+      deleteAccount: ({ cfg, accountId }) => {
+        if (cfg.channels?.{{CHANNEL_ID}}) {
+          delete cfg.channels.{{CHANNEL_ID}};
+        }
+        return cfg;
+      },
+    },
+
+    // =========================================================================
+    // Optional: Directory Adapter
+    // =========================================================================
+    // TODO: Implement if channel supports user/group directory lookup
+    directory: {
+      /**
+       * Get info about the bot user
+       */
+      self: async () => null,
+
+      /**
+       * List users/chats that can be messaged
+       */
+      listPeers: async () => [],
+
+      /**
+       * List groups/channels
+       */
+      listGroups: async () => [],
+    },
+
+    // =========================================================================
+    // Required: Outbound Adapter (Send Messages)
+    // =========================================================================
+    outbound: {
+      /**
+       * Send text message
+       * TODO: Implement channel-specific message sending
+       *
+       * @param {Object} params
+       * @param {Object} params.cfg - OpenClaw config
+       * @param {string} params.to - Recipient ID (format: "{{CHANNEL_ID}}:userId" or "userId")
+       * @param {string} params.text - Message text
+       * @param {string} params.accountId - Account ID
+       * @returns {Promise<{channel: string, messageId: string}>}
+       */
+      sendText: async ({ cfg, to, text, accountId }) => {
+        const userId = to.replace(/^{{CHANNEL_ID}}:/, "");
+
+        logger.debug("Sending text message", { to: userId, textPreview: text.substring(0, 50) });
+
+        // TODO: Implement channel-specific message sending
+        // Example:
+        // const account = resolveAccount(cfg, accountId);
+        // const response = await fetch(`${API_BASE_URL}/messages`, {
+        //   method: 'POST',
+        //   headers: {
+        //     'Authorization': `Bearer ${account.token}`,
+        //     'Content-Type': 'application/json',
+        //   },
+        //   body: JSON.stringify({
+        //     to: userId,
+        //     text: text,
+        //   }),
+        // });
+        // const data = await response.json();
+        // return { channel: "{{CHANNEL_ID}}", messageId: data.id };
+
+        logger.info("Text message sent", { to: userId });
+        return {
+          channel: "{{CHANNEL_ID}}",
+          messageId: `msg_${Date.now()}`,
+        };
+      },
+
+      /**
+       * Send media message
+       * TODO: Implement channel-specific media sending
+       *
+       * @param {Object} params
+       * @param {Object} params.cfg - OpenClaw config
+       * @param {string} params.to - Recipient ID
+       * @param {string} params.text - Caption text
+       * @param {string} params.mediaUrl - Media URL or local path
+       * @param {string} params.accountId - Account ID
+       * @returns {Promise<{channel: string, messageId: string}>}
+       */
+      sendMedia: async ({ cfg, to, text, mediaUrl, accountId }) => {
+        const userId = to.replace(/^{{CHANNEL_ID}}:/, "");
+
+        logger.debug("Sending media message", { to: userId, mediaUrl });
+
+        // TODO: Implement channel-specific media sending
+        // Consider:
+        // - External URLs vs local file paths
+        // - Supported media types (images, videos, files)
+        // - Size limits
+        // - Upload process if needed
+
+        logger.info("Media message sent", { to: userId });
+        return {
+          channel: "{{CHANNEL_ID}}",
+          messageId: `msg_media_${Date.now()}`,
+        };
+      },
+    },
+
+    // =========================================================================
+    // Required: Gateway Adapter (Receive Messages)
+    // =========================================================================
+    gateway: {
+      /**
+       * Start gateway for an account
+       * TODO: Implement channel-specific gateway startup
+       *
+       * @param {Object} ctx - Gateway context
+       * @param {Object} ctx.account - Resolved account
+       * @param {Object} ctx.cfg - OpenClaw config
+       * @returns {Promise<{shutdown: Function}>}
+       */
+      startAccount: async (ctx) => {
+        const account = ctx.account;
+
+        logger.info("{{CHANNEL_LABEL}} gateway starting", {
+          accountId: account.accountId,
+        });
+
+        // TODO: Implement gateway startup
+        // Examples:
+        // - Register webhook target
+        // - Start polling thread
+        // - Connect to WebSocket
+        // - Start long-polling
+
+        return {
+          shutdown: async () => {
+            logger.info("{{CHANNEL_LABEL}} gateway shutting down");
+
+            // TODO: Implement cleanup
+            // - Unregister webhook
+            // - Close connections
+            // - Stop polling
+          },
+        };
+      },
+    },
+  };
+}
+
+// =============================================================================
+// Helper Functions (Channel-Specific)
+// =============================================================================
+
+/**
+ * Resolve account from config
+ * TODO: Move to utils.js if more complex
+ */
+function resolveAccount(cfg, accountId) {
+  const channel = cfg?.channels?.{{CHANNEL_ID}};
+  if (!channel) return null;
+  return {
+    id: accountId || defaultAccountId,
+    accountId: accountId || defaultAccountId,
+    enabled: channel.enabled !== false,
+    config: channel,
+  };
+}

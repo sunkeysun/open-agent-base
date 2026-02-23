@@ -1,0 +1,86 @@
+/**
+ * OpenClaw {{CHANNEL_LABEL}} Plugin Utilities
+ *
+ * Common utility functions for the plugin.
+ * Add channel-specific utilities here.
+ */
+
+// =============================================================================
+// TODO: Add channel-specific utility functions
+// =============================================================================
+
+// Examples:
+// - Signature verification
+// - Message encryption/decryption
+// - Media download helpers
+// - Deduplication cache
+// - Rate limiting
+
+/**
+ * Sleep for specified milliseconds
+ * @param {number} ms - Milliseconds to sleep
+ */
+export function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Create a simple deduplication cache
+ * @param {number} ttlMs - Time-to-live in milliseconds
+ */
+export function createDedupeCache(ttlMs = 60000) {
+  const cache = new Map();
+
+  return {
+    /**
+     * Check if key exists and is not expired
+     * @param {string} key - Cache key
+     * @returns {boolean} True if key exists (duplicate)
+     */
+    has(key) {
+      const entry = cache.get(key);
+      if (!entry) return false;
+      if (Date.now() > entry.expiresAt) {
+        cache.delete(key);
+        return false;
+      }
+      return true;
+    },
+
+    /**
+     * Add key to cache
+     * @param {string} key - Cache key
+     */
+    add(key) {
+      cache.set(key, { expiresAt: Date.now() + ttlMs });
+    },
+
+    /**
+     * Clear all entries
+     */
+    clear() {
+      cache.clear();
+    },
+  };
+}
+
+/**
+ * Escape regex special characters
+ * @param {string} str - String to escape
+ */
+export function escapeRegExp(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Safely parse JSON
+ * @param {string} str - JSON string
+ * @param {*} fallback - Fallback value if parsing fails
+ */
+export function safeParseJson(str, fallback = null) {
+  try {
+    return JSON.parse(str);
+  } catch {
+    return fallback;
+  }
+}
