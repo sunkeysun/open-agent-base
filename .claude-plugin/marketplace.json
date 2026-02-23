@@ -1,0 +1,23 @@
+{
+  "name": "open-agent-base",
+  "metadata": {
+    "description": "Open Agent Base - 技能集合仓库",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "openclaw",
+      "description": "OpenClaw 相关技能，包括通道插件开发和集成工具",
+      "source": "./",
+      "strict": false,
+      "skills": ["./skills/openclaw-plugin-dev"]
+    },
+    {
+      "name": "meta-skill",
+      "description": "Agent元能力相关工具和模板",
+      "source": "./",
+      "strict": false,
+      "skills": ["./skills/skill-creator"]
+    }
+  ]
+}
